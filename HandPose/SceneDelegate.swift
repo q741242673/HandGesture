@@ -7,6 +7,7 @@ The app's scene delegate object.
 
 import UIKit
 
+// シーンの処理
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
