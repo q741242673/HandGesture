@@ -20,15 +20,15 @@ class SpatialGestureProcessorBase {
 
 // MARK: 変数（プロパティ）
 
-	// 外部のクラスからアクセスされる可能性のある変数/定義
+	// 外部のクラスからアクセスされる変数/定義
 	typealias PointsPair = (thumbTip: CGPoint, indexTip: CGPoint)	// 2点をまとめて取り扱うための定義
-	var didChangeStateClosure: ((State) -> Void)?	// stateが変化した時に呼び出す関数（上位のクラスCameraViewControllerから設定される関数）
+	var didChangeStateClosure: ((State) -> Void)?					// stateが変化した時に呼び出す関数（上位のクラスCameraViewControllerから設定される関数）
 
 	// このクラス内でのみ使用するprivate変数
-	private var cameraView: CameraView!										// カメラ画像を表示するビュー
 	private var tipsColor: UIColor = .red									// 指先を示す点の色
 	private var gestureEvidenceCounter = 0									// ジェスチャーが安定するまでのカウンター
 	private let evidenceCounterStateTrigger: Int							// ジェスチャーの状態がしばらく続いているかを判断する閾値
+	private var evidenceBuffer = [PointsPair]()								// 2本指が確定するまでの指の軌跡を一時的に記録する
 	private var pinchEvidenceCounter = 0									// 2点が近づいたカウンター
 	private var apartEvidenceCounter = 0									// 2点が離れたカウンター
 	private let pinchMaxDistance: CGFloat = 40								// 2点が近づいていると判断する基準となる距離
@@ -39,6 +39,13 @@ class SpatialGestureProcessorBase {
 		}
 	}
 
+	// カメラ画面へのアクセス
+	var cameraView: CameraView!										// カメラ画像を表示するビュー
+	var drawLayer: DrawLayer?										// カメラ画面上の描画レイヤー
+
+// MARK: カメラ画面へのアクセス
+
+	
 // MARK: 関数（メソッド）
 	// クラスの初期化。
 	init(evidenceCounterStateTrigger: Int = 3) {
@@ -91,11 +98,11 @@ class SpatialGestureProcessorBase {
 	}
 
 	// カメラに写った手を画像処理する関数
-	func processHandPoseObservation(observation: VNHumanHandPoseObservation, cameraView: CameraView) {
+	func processHandPoseObservation(observation: VNHumanHandPoseObservation) {
 		
 		var thumbTip: CGPoint?
 		var indexTip: CGPoint?
-		self.cameraView = cameraView
+
 		do {
 			// 親指と人差し指の全ての関節位置を取得する
 			let thumbPoints = try observation.recognizedPoints(.thumb)
@@ -125,7 +132,7 @@ class SpatialGestureProcessorBase {
 			lastProcessedPointsPair = pointsPair
 			
 			// 指先を画面にドット表示
-			self.cameraView.showPoints([pointsPair.thumbTip, pointsPair.indexTip], color: tipsColor)
+			self.cameraView?.showPoints([pointsPair.thumbTip, pointsPair.indexTip], color: tipsColor)
 
 			// 今回の2点（pointsPair）の距離を計算
 			let distance = pointsPair.indexTip.distance(from: pointsPair.thumbTip)
@@ -137,7 +144,6 @@ class SpatialGestureProcessorBase {
 				apartEvidenceCounter = 0	// 遠ざかった状態はカウントしない
 				// 数回続いたら pinched、続きそうなら possiblePinch をstateに入れる
 				state = (pinchEvidenceCounter >= evidenceCounterStateTrigger) ? .pinched : .possiblePinch
-				
 				// 判断基準となる2点間距離より離れていたら
 			} else {
 				// その状態がしばらく続くのを観察する（その状態が何回続いたかをカウント）
@@ -146,8 +152,24 @@ class SpatialGestureProcessorBase {
 				// 数回続いたら apart、続きそうなら possibleApart をstateに入れる
 				state = (apartEvidenceCounter >= evidenceCounterStateTrigger) ? .apart : .possibleApart
 			}
+			
+			// 状況によって曲線バッファを更新する
+			switch state {
+			case .possiblePinch, .possibleApart:
+				evidenceBuffer.append(pointsPair)
+			case .pinched:
+				for bufferedPoints in evidenceBuffer {
+					drawLayer?.updatePath(with: bufferedPoints, isLastPointsPair: false)
+				}
+				evidenceBuffer.removeAll()
+				drawLayer?.updatePath(with: pointsPair, isLastPointsPair: false)
+			case .apart, .unknown:
+				evidenceBuffer.removeAll()
+				drawLayer?.updatePath(with: pointsPair, isLastPointsPair: true)
+			}
 		} catch {
 			NSLog("エラー発生")
 		}
 	}
+	
 }
