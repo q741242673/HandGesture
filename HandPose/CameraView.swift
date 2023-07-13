@@ -1,22 +1,17 @@
 /*
-See LICENSE folder for this sample’s licensing information.
-
-Abstract:
-The camera view shows the feed from the camera, and renders the points
-     returned from VNDetectHumanHandpose observations.
+	カメラ処理
 */
 
 import UIKit
 import AVFoundation
 
-// カメラ処理
 class CameraView: UIView {
 
-    private var overlayLayer = CAShapeLayer()	// カメラ画面上に曲線を表示するレイヤー
-    private var pointsPath = UIBezierPath()		// 曲線の接続点
+    private var overlayLayer = DrawLayer()	// カメラ画面上に描画するレイヤー
+	private var pointsPath = UIBezierPath()		// 点
 
+	// MARK: カメラレイヤーの初期化
 	// ↓ ここからカメラ処理のお決まりのパターン
-	
     var previewLayer: AVCaptureVideoPreviewLayer {
         return layer as! AVCaptureVideoPreviewLayer
     }
@@ -44,9 +39,11 @@ class CameraView: UIView {
 
     private func setupOverlay() {
         previewLayer.addSublayer(overlayLayer)
+		overlayLayer.cameraView = self
     }
 	// ↑ ここまでカメラ処理のお決まりのパターン
 
+	// MARK: 点を描く（描画とは別のレイヤー）
 	// 点を描く　引数：points=描画する点の配列、 color=表示色
     func showPoints(_ points: [CGPoint], color: UIColor) {
 		// いったん全ての点を消す

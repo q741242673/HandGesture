@@ -6,12 +6,13 @@ import Foundation
 import UIKit
 import AVFoundation
 
-private let drawPath = UIBezierPath()
+private let drawPath = UIBezierPath()		// 曲線
 private var lastDrawPoint: CGPoint?
 private var isFirstSegment = true
 
 // カメラ処理
 class DrawLayer: CAShapeLayer {
+	var cameraView: CameraView!
 
 	func prepare() {
 		lineWidth = 5
@@ -68,6 +69,7 @@ class DrawLayer: CAShapeLayer {
 		drawPath.removeAllPoints()
 		self.path = drawPath.cgPath
 	}
+	
 }
 
 

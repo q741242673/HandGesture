@@ -21,6 +21,8 @@ class SpatialGestureProcessorBase {
 // MARK: 変数（プロパティ）
 
 	// 外部のクラスからアクセスされる変数/定義
+	var cameraView: CameraView!										// カメラ画像を表示するビュー
+	var drawLayer: DrawLayer?										// カメラ画面上の描画レイヤー
 	typealias PointsPair = (thumbTip: CGPoint, indexTip: CGPoint)	// 2点をまとめて取り扱うための定義
 	var didChangeStateClosure: ((State) -> Void)?					// stateが変化した時に呼び出す関数（上位のクラスCameraViewControllerから設定される関数）
 
@@ -38,16 +40,8 @@ class SpatialGestureProcessorBase {
 			didChangeStateClosure?(state)	// stateが変化したらdidChangeStateClosureを呼び出す
 		}
 	}
-
-	// カメラ画面へのアクセス
-	var cameraView: CameraView!										// カメラ画像を表示するビュー
-	var drawLayer: DrawLayer?										// カメラ画面上の描画レイヤー
-
-// MARK: カメラ画面へのアクセス
-
 	
-// MARK: 関数（メソッド）
-	// クラスの初期化。
+	// MARK: 初期化
 	init(evidenceCounterStateTrigger: Int = 3) {
 		self.evidenceCounterStateTrigger = evidenceCounterStateTrigger
 		
@@ -59,45 +53,7 @@ class SpatialGestureProcessorBase {
 		reset()
 	}
 	
-	// 判定状態のリセット
-	func reset() {
-		state = .unknown			// 状況不明
-		pinchEvidenceCounter = 0	// 2点が近づいたカウンター = 0
-		apartEvidenceCounter = 0	// 2点が離れたカウンター = 0
-	}
-
-	// ジェスチャーが検知された時に行う処理
-	private func handleGestureStateChange(_ state: State) {
-
-		switch state {
-		case .possiblePinch:
-			tipsColor = .orange
-			NSLog("指がくっつきそう")
-			break
-		case .pinched:
-			tipsColor = .green
-			NSLog("指がくっついた")
-			break
-		case .possibleApart:
-			tipsColor = .orange
-			NSLog("指が離れそう")
-			break
-		case .apart:
-			tipsColor = .red
-			NSLog("指が離れた")
-			break
-		case .unknown:
-			tipsColor = .red
-			NSLog("不明")
-			break
-		default:
-			tipsColor = .red
-			NSLog("不明")
-			break
-		}
-	}
-
-	// カメラに写った手を画像処理する関数
+	// MARK: カメラに写った手を画像処理する
 	func processHandPoseObservation(observation: VNHumanHandPoseObservation) {
 		
 		var thumbTip: CGPoint?
@@ -132,7 +88,7 @@ class SpatialGestureProcessorBase {
 			lastProcessedPointsPair = pointsPair
 			
 			// 指先を画面にドット表示
-			self.cameraView?.showPoints([pointsPair.thumbTip, pointsPair.indexTip], color: tipsColor)
+			cameraView?.showPoints([pointsPair.thumbTip, pointsPair.indexTip], color: tipsColor)
 
 			// 今回の2点（pointsPair）の距離を計算
 			let distance = pointsPair.indexTip.distance(from: pointsPair.thumbTip)
@@ -153,23 +109,68 @@ class SpatialGestureProcessorBase {
 				state = (apartEvidenceCounter >= evidenceCounterStateTrigger) ? .apart : .possibleApart
 			}
 			
-			// 状況によって曲線バッファを更新する
-			switch state {
-			case .possiblePinch, .possibleApart:
-				evidenceBuffer.append(pointsPair)
-			case .pinched:
-				for bufferedPoints in evidenceBuffer {
-					drawLayer?.updatePath(with: bufferedPoints, isLastPointsPair: false)
-				}
-				evidenceBuffer.removeAll()
-				drawLayer?.updatePath(with: pointsPair, isLastPointsPair: false)
-			case .apart, .unknown:
-				evidenceBuffer.removeAll()
-				drawLayer?.updatePath(with: pointsPair, isLastPointsPair: true)
-			}
+			// カメラ画面上へ曲線を描画
+			updatePath(pointsPair: pointsPair)
 		} catch {
 			NSLog("エラー発生")
 		}
 	}
 	
+	// MARK: カメラ画面上の描画レイヤーへアクセス
+	func updatePath(pointsPair: PointsPair) {
+		// 状況によって曲線バッファを更新する（カメラ画面上の描画レイヤーへupdatePathでアクセス）
+		switch state {
+		case .possiblePinch, .possibleApart:
+			evidenceBuffer.append(pointsPair)
+		case .pinched:
+			for bufferedPoints in evidenceBuffer {
+				drawLayer?.updatePath(with: bufferedPoints, isLastPointsPair: false)
+			}
+			evidenceBuffer.removeAll()
+			drawLayer?.updatePath(with: pointsPair, isLastPointsPair: false)
+		case .apart, .unknown:
+			evidenceBuffer.removeAll()
+			drawLayer?.updatePath(with: pointsPair, isLastPointsPair: true)
+		}
+	}
+
+	// MARK: ジェスチャー判定が更新された時に行う処理
+	private func handleGestureStateChange(_ state: State) {
+
+		switch state {
+		case .possiblePinch:
+			tipsColor = .orange
+			NSLog("指がくっつきそう")
+			break
+		case .pinched:
+			tipsColor = .green
+			NSLog("指がくっついた")
+			break
+		case .possibleApart:
+			tipsColor = .orange
+			NSLog("指が離れそう")
+			break
+		case .apart:
+			tipsColor = .red
+			NSLog("指が離れた")
+			break
+		case .unknown:
+			tipsColor = .red
+			NSLog("不明")
+			break
+		default:
+			tipsColor = .red
+			NSLog("不明")
+			break
+		}
+	}
+
+	// MARK: 判定状態のリセット
+	func reset() {
+		state = .unknown			// 状況不明
+		pinchEvidenceCounter = 0	// 2点が近づいたカウンター = 0
+		apartEvidenceCounter = 0	// 2点が離れたカウンター = 0
+	}
+
+
 }
