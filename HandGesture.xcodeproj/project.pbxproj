@@ -15,6 +15,7 @@
 		C4EB82F4248AEB7B00CD7D41 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C4EB82F3248AEB7B00CD7D41 /* Assets.xcassets */; };
 		C4EB82F7248AEB7B00CD7D41 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C4EB82F5248AEB7B00CD7D41 /* LaunchScreen.storyboard */; };
 		FF0192582A5F859E0062358D /* DrawLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0192572A5F859E0062358D /* DrawLayer.swift */; };
+		FF01925A2A5F9F7A0062358D /* SpatialGestureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0192592A5F9E090062358D /* SpatialGestureProcessor.swift */; };
 		FFAC9AA92A5E8441008CF55D /* SpatialGestureProcessorBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFAC9AA82A5E8441008CF55D /* SpatialGestureProcessorBase.swift */; };
 /* End PBXBuildFile section */
 
@@ -32,6 +33,7 @@
 		C4EB82F6248AEB7B00CD7D41 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		C4EB82F8248AEB7B00CD7D41 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FF0192572A5F859E0062358D /* DrawLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawLayer.swift; sourceTree = "<group>"; };
+		FF0192592A5F9E090062358D /* SpatialGestureProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpatialGestureProcessor.swift; sourceTree = "<group>"; };
 		FFAC9AA82A5E8441008CF55D /* SpatialGestureProcessorBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpatialGestureProcessorBase.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -75,9 +77,10 @@
 		C4EB82E9248AEB7B00CD7D41 /* HandPose */ = {
 			isa = PBXGroup;
 			children = (
-				C475655A248AEBD800F111B8 /* CameraView.swift */,
 				C475655C248AEBD900F111B8 /* CameraViewController.swift */,
 				FFAC9AA82A5E8441008CF55D /* SpatialGestureProcessorBase.swift */,
+				FF0192592A5F9E090062358D /* SpatialGestureProcessor.swift */,
+				C475655A248AEBD800F111B8 /* CameraView.swift */,
 				FF0192572A5F859E0062358D /* DrawLayer.swift */,
 				C4EB82F5248AEB7B00CD7D41 /* LaunchScreen.storyboard */,
 				C4EB82F0248AEB7B00CD7D41 /* Main.storyboard */,
@@ -161,6 +164,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FF01925A2A5F9F7A0062358D /* SpatialGestureProcessor.swift in Sources */,
 				C4EB82EB248AEB7B00CD7D41 /* AppDelegate.swift in Sources */,
 				FF0192582A5F859E0062358D /* DrawLayer.swift in Sources */,
 				C4EB82ED248AEB7B00CD7D41 /* SceneDelegate.swift in Sources */,

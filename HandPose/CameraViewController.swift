@@ -25,8 +25,8 @@ class CameraViewController: UIViewController {
 	private var handPoseRequest = VNDetectHumanHandPoseRequest()		// 指の関節の位置情報を検出するためのクラス
 	
 	// 空間ジェスチャー
-	private var spatialGestureProcessor = SpatialGestureProcessorBase()		// 空間ジェスチャーを判定するクラス
-	
+	private var spatialGestureProcessor = SpatialGestureProcessor()		// 空間ジェスチャーを判定するクラス
+
 	// アプリ画面が表示される直前の処理
 	override func viewDidLoad() {
 		super.viewDidLoad()
