@@ -24,7 +24,7 @@
 		C475655A248AEBD800F111B8 /* CameraView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
 		C475655C248AEBD900F111B8 /* CameraViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
 		C4756560248AEC4100F111B8 /* HandPose.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HandPose.entitlements; sourceTree = "<group>"; };
-		C4EB82E7248AEB7B00CD7D41 /* HandPose.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HandPose.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C4EB82E7248AEB7B00CD7D41 /* HandGesture.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HandGesture.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4EB82EA248AEB7B00CD7D41 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		C4EB82EC248AEB7B00CD7D41 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		C4EB82F1248AEB7B00CD7D41 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -67,7 +67,7 @@
 		C4EB82E8248AEB7B00CD7D41 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				C4EB82E7248AEB7B00CD7D41 /* HandPose.app */,
+				C4EB82E7248AEB7B00CD7D41 /* HandGesture.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -93,9 +93,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		C4EB82E6248AEB7B00CD7D41 /* HandPose */ = {
+		C4EB82E6248AEB7B00CD7D41 /* HandGesture */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C4EB82FB248AEB7B00CD7D41 /* Build configuration list for PBXNativeTarget "HandPose" */;
+			buildConfigurationList = C4EB82FB248AEB7B00CD7D41 /* Build configuration list for PBXNativeTarget "HandGesture" */;
 			buildPhases = (
 				C4EB82E3248AEB7B00CD7D41 /* Sources */,
 				C4EB82E4248AEB7B00CD7D41 /* Frameworks */,
@@ -105,9 +105,9 @@
 			);
 			dependencies = (
 			);
-			name = HandPose;
+			name = HandGesture;
 			productName = HandPose;
-			productReference = C4EB82E7248AEB7B00CD7D41 /* HandPose.app */;
+			productReference = C4EB82E7248AEB7B00CD7D41 /* HandGesture.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -125,7 +125,7 @@
 					};
 				};
 			};
-			buildConfigurationList = C4EB82E2248AEB7B00CD7D41 /* Build configuration list for PBXProject "HandPose" */;
+			buildConfigurationList = C4EB82E2248AEB7B00CD7D41 /* Build configuration list for PBXProject "HandGesture" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -138,7 +138,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				C4EB82E6248AEB7B00CD7D41 /* HandPose */,
+				C4EB82E6248AEB7B00CD7D41 /* HandGesture */,
 			);
 		};
 /* End PBXProject section */
@@ -359,7 +359,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		C4EB82E2248AEB7B00CD7D41 /* Build configuration list for PBXProject "HandPose" */ = {
+		C4EB82E2248AEB7B00CD7D41 /* Build configuration list for PBXProject "HandGesture" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C4EB82F9248AEB7B00CD7D41 /* Debug */,
@@ -368,7 +368,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C4EB82FB248AEB7B00CD7D41 /* Build configuration list for PBXNativeTarget "HandPose" */ = {
+		C4EB82FB248AEB7B00CD7D41 /* Build configuration list for PBXNativeTarget "HandGesture" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C4EB82FC248AEB7B00CD7D41 /* Debug */,
