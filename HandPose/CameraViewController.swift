@@ -136,10 +136,15 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
 		var handPoseObservation: VNHumanHandPoseObservation?
 		defer {
 			DispatchQueue.main.sync {
-				guard let observation = handPoseObservation else {
+				guard let observations = handPoseRequest.results else {
 					return
 				}
-				spatialGestureProcessor.processHandPoseObservation(observation: observation)
+				spatialGestureProcessor.processHandPoseObservations(observations: observations)
+
+//				guard let observation = handPoseObservation else {
+//					return
+//				}
+//				spatialGestureProcessor.processHandPoseObservation(observation: observation)
 			}
 		}
 		

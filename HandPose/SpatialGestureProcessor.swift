@@ -12,6 +12,25 @@ class SpatialGestureProcessor {
 	// 判定状態のバリエーション（いまどんな状況かを表す）
 	enum State {
 		case unknown
+		case possible
+		case detected
+	}
+	enum WhichHand: Int {
+		case right = 0
+		case left  = 1
+	}
+	enum WhichFinger: Int {
+		case thumb  = 0
+		case index
+		case middle
+		case ring
+		case little
+	}
+	enum WhichJoint: Int {
+		case tip = 0	// 指先
+		case dip		// 第1関節
+		case pip		// 第2関節
+		case mcp		// 第3関節
 	}
 
 // MARK: 変数（プロパティ）
@@ -22,7 +41,10 @@ class SpatialGestureProcessor {
 	var didChangeStateClosure: ((State) -> Void)?					// stateが変化した時に呼び出す関数（上位のクラスCameraViewControllerから設定される関数）
 
 	// このクラス内でのみ使用するprivate変数
-	private var fingerJoints = [[VNRecognizedPoint?]]()				// 指の関節位置の配列
+	private var defaultHand = WhichHand.right						// 片手だけ検出された場合は右手と仮定する（世界的に右利きが多いので）
+	private var handJoints: [[[VNRecognizedPoint?]]] = []			// 両手の指の関節位置の配列（0:右手、1:左手）
+	private var fingerJoints: [[VNRecognizedPoint?]] = []			// 指の関節位置の配列
+//	private var fingerJoints = [[VNRecognizedPoint?]]()				// 指の関節位置の配列
 	private var fingerJointsCnv = [[CGPoint?]]()					// 指の関節位置の配列
 	private var wristJoint: VNRecognizedPoint?
 	private var tipsColor: UIColor = .red							// 指先を示す点の色
@@ -45,23 +67,102 @@ class SpatialGestureProcessor {
 		reset()
 	}
 	
-	// MARK: カメラに写った手を画像認識する
-	func processHandPoseObservation(observation: VNHumanHandPoseObservation) {
-		
-		do {
-			self.fingerJoints = try getFingerJoints(with: observation)		// 指関節の検出
-			drawLayer?.path = drawFingers(fingerJoints: self.fingerJoints)	// 指関節を描画
+	// MARK: ジェスチャー判定ロジック
+	func checkGesture() {
+		if handJoints.count > 1 { // 両手のジェスチャー
+			var posRightT: CGPoint? = jointPosition(hand: WhichHand.right, finger: WhichFinger.thumb, joint: WhichJoint.tip)
+			var posRightI: CGPoint? = jointPosition(hand: WhichHand.right, finger: WhichFinger.index, joint: WhichJoint.tip)
+			var posLeftT:  CGPoint? = jointPosition(hand: WhichHand.left, finger: WhichFinger.thumb, joint: WhichJoint.tip)
+			var posLeftI:  CGPoint? = jointPosition(hand: WhichHand.left, finger: WhichFinger.index, joint: WhichJoint.tip)
 			
-			// ここで指関節の座標を使ってジェスチャーを判断する
-			// 　・・・
-			// 　・・・
+			NSLog("Gesture checking.")
+			guard let posRightI, let posRightT, let posLeftI, let posLeftT else {
+				return
+			}
+			var closePos = 50.0
+			var iDiff = fabs(posRightI.x - posLeftI.x)
+			var tDiff = fabs(posRightT.x - posLeftT.x)
+			if iDiff < closePos {
+				if tDiff < closePos {
+					NSLog("Gesture recognized diff=(%f, %f)", tDiff, iDiff)
+				}
+			}
+		}
+	}
+	// MARK: ジェスチャー判定が更新された時に行う処理
+	private func handleGestureStateChange(_ state: State) {
 
-		} catch {
-			NSLog("Error")
+		switch state {
+		case .unknown:
+			tipsColor = .red
+			NSLog("不明")
+			break
+		default:
+			tipsColor = .red
+			NSLog("不明")
+			break
 		}
 	}
 
-	// 指の関節座標を画面座標系（UIKit coordinates）で取得する
+	// MARK: 判定状態のリセット
+	func reset() {
+		state = .unknown			// 状況不明
+	}
+
+	// MARK: カメラに写った手を画像認識する
+
+	func processHandPoseObservations(observations: [VNHumanHandPoseObservation]) {
+
+		var fingerJoints1 = [[VNRecognizedPoint?]]()
+		var fingerJoints2 = [[VNRecognizedPoint?]]()
+		var fingerPath = CGMutablePath()
+		
+		do {
+			// 片手ずつgetFingerJoints
+			if observations.count>0 {
+				fingerJoints1 = try getFingerJoints(with: observations[0])		// 指関節の検出
+				fingerPath.addPath(drawFingers(fingerJoints: fingerJoints1))	// 指関節のパスを取得
+			}
+			if observations.count>1 {
+				fingerJoints2 = try getFingerJoints(with: observations[1])		// 指関節の検出
+				fingerPath.addPath(drawFingers(fingerJoints: fingerJoints2))	// 指関節のパスを取得
+			}
+
+			// 手が2つあったら、親指関節の位置関係で右手と左手を判断する
+			switch observations.count {
+			case 1:
+				handJoints.removeAll()
+				handJoints.insert(fingerJoints1, at: defaultHand.rawValue)
+			case 2:
+				let thumbPos1 = jointPosition(hand: fingerJoints1, finger: WhichFinger.thumb.rawValue, joint: WhichJoint.tip.rawValue)
+				let thumbPos2 = jointPosition(hand: fingerJoints2, finger: WhichFinger.thumb.rawValue, joint: WhichJoint.tip.rawValue)
+				guard let pos1=thumbPos1, let pos2=thumbPos2 else {
+					return
+				}
+				handJoints.removeAll()
+				if pos1.x < pos2.x {
+					handJoints.append(fingerJoints2)	// WhichHand.right.rawValue
+					handJoints.append(fingerJoints1)
+				}
+				else {
+					handJoints.append(fingerJoints1)	// WhichHand.right.rawValue
+					handJoints.append(fingerJoints2)
+				}
+			default:
+				handJoints.removeAll()
+			}
+			
+		} catch {
+			NSLog("Error")
+		}
+
+		drawLayer?.path = fingerPath	// パスを描画
+
+		// ここで指関節の座標を使ってジェスチャーを判断する
+		checkGesture()
+	}
+
+	// 指の関節座標を取得する
 	func getFingerJoints(with observation: VNHumanHandPoseObservation) throws -> [[VNRecognizedPoint?]] {
 		do {
 			let fingers = try observation.recognizedPoints(.all)
@@ -73,19 +174,26 @@ class SpatialGestureProcessor {
 				[fingers[.ringTip],  fingers[.ringDIP],  fingers[.ringPIP],  fingers[.ringMCP]],
 				[fingers[.littleTip],fingers[.littleDIP],fingers[.littlePIP],fingers[.littleMCP]]
 			]
-			// 指の関節座標を画面座標系（UIKit coordinates）で取得する（CGPoint）
-			fingerJointsCnv = [
-				[cnv(fingers[.thumbTip]), cnv(fingers[.thumbIP]),  cnv(fingers[.thumbMP]),  cnv(fingers[.thumbCMC])],
-				[cnv(fingers[.indexTip]), cnv(fingers[.indexDIP]), cnv(fingers[.indexPIP]), cnv(fingers[.indexMCP])],
-				[cnv(fingers[.middleTip]),cnv(fingers[.middleDIP]),cnv(fingers[.middlePIP]),cnv(fingers[.middleMCP])],
-				[cnv(fingers[.ringTip]),  cnv(fingers[.ringDIP]),  cnv(fingers[.ringPIP]),  cnv(fingers[.ringMCP])],
-				[cnv(fingers[.littleTip]),cnv(fingers[.littleDIP]),cnv(fingers[.littlePIP]),cnv(fingers[.littleMCP])]
-			]
-			wristJoint = fingers[.wrist]
+			wristJoint = fingers[.wrist]	// 手首の位置
 		} catch {
 			NSLog("Error")
 		}
 		return fingerJoints
+	}
+
+	// 指の関節座標を画面座標系（UIKit coordinates）で取得する（CGPoint）
+	func jointPosition(hand: [[VNRecognizedPoint?]], finger: Int, joint: Int) -> CGPoint? {
+		return cnv(hand[finger][joint])
+	}
+	func jointPosition(hand: WhichHand, finger: WhichFinger, joint: WhichJoint) -> CGPoint? {
+		switch handJoints.count {
+		case 1:
+			return cnv(handJoints[WhichHand.right.rawValue][finger.rawValue][joint.rawValue])
+		case 2:
+			return cnv(handJoints[hand.rawValue][finger.rawValue][joint.rawValue])
+		default:
+			return nil
+		}
 	}
 
 	// 指を描画
@@ -131,26 +239,6 @@ class SpatialGestureProcessor {
 		let pointConverted = previewLayer.layerPointConverted(fromCaptureDevicePoint: point2)
 //		NSLog("%f, %f", pointConverted.x, pointConverted.y)
 		return pointConverted
-	}
-
-	// MARK: ジェスチャー判定が更新された時に行う処理
-	private func handleGestureStateChange(_ state: State) {
-
-		switch state {
-		case .unknown:
-			tipsColor = .red
-			NSLog("不明")
-			break
-		default:
-			tipsColor = .red
-			NSLog("不明")
-			break
-		}
-	}
-
-	// MARK: 判定状態のリセット
-	func reset() {
-		state = .unknown			// 状況不明
 	}
 
 }
