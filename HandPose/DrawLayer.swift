@@ -77,14 +77,14 @@ class DrawLayer: CAShapeLayer {
 
 extension CGPoint {	// CGPointの機能拡張
 
-	// 2点の中間点を計算して返す
-	static func midPoint(p1: CGPoint, p2: CGPoint) -> CGPoint {
-		return CGPoint(x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2)
-	}
+//	// 2点の中間点を計算して返す
+//	static func midPoint(p1: CGPoint, p2: CGPoint) -> CGPoint {
+//		return CGPoint(x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2)
+//	}
 	
-	// 2点間の距離を計算する
-	func distance(from point: CGPoint) -> CGFloat {
-		return hypot(point.x - x, point.y - y)
-	}
+//	// 2点間の距離を計算する
+//	func distance(from point: CGPoint) -> CGFloat {
+//		return hypot(point.x - x, point.y - y)
+//	}
 }
 

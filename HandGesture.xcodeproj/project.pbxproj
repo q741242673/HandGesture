@@ -16,6 +16,7 @@
 		C4EB82F7248AEB7B00CD7D41 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C4EB82F5248AEB7B00CD7D41 /* LaunchScreen.storyboard */; };
 		FF0192582A5F859E0062358D /* DrawLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0192572A5F859E0062358D /* DrawLayer.swift */; };
 		FF01925A2A5F9F7A0062358D /* SpatialGestureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0192592A5F9E090062358D /* SpatialGestureProcessor.swift */; };
+		FF59AF552A612885003ADC97 /* CGPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF59AF532A612749003ADC97 /* CGPoint.swift */; };
 		FFAC9AA92A5E8441008CF55D /* SpatialGestureProcessorBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFAC9AA82A5E8441008CF55D /* SpatialGestureProcessorBase.swift */; };
 /* End PBXBuildFile section */
 
@@ -34,6 +35,11 @@
 		C4EB82F8248AEB7B00CD7D41 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FF0192572A5F859E0062358D /* DrawLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawLayer.swift; sourceTree = "<group>"; };
 		FF0192592A5F9E090062358D /* SpatialGestureProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpatialGestureProcessor.swift; sourceTree = "<group>"; };
+		FF59AF502A612749003ADC97 /* CGAffineTransform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGAffineTransform.swift; sourceTree = "<group>"; };
+		FF59AF512A612749003ADC97 /* CGSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGSize.swift; sourceTree = "<group>"; };
+		FF59AF522A612749003ADC97 /* CGVector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGVector.swift; sourceTree = "<group>"; };
+		FF59AF532A612749003ADC97 /* CGPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPoint.swift; sourceTree = "<group>"; };
+		FF59AF542A612749003ADC97 /* CGRect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGRect.swift; sourceTree = "<group>"; };
 		FFAC9AA82A5E8441008CF55D /* SpatialGestureProcessorBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpatialGestureProcessorBase.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -86,11 +92,24 @@
 				C4EB82F0248AEB7B00CD7D41 /* Main.storyboard */,
 				C4EB82EA248AEB7B00CD7D41 /* AppDelegate.swift */,
 				C4EB82EC248AEB7B00CD7D41 /* SceneDelegate.swift */,
+				FF59AF4F2A612749003ADC97 /* CGPointVector */,
 				C4EB82F3248AEB7B00CD7D41 /* Assets.xcassets */,
 				C4756560248AEC4100F111B8 /* HandPose.entitlements */,
 				C4EB82F8248AEB7B00CD7D41 /* Info.plist */,
 			);
 			path = HandPose;
+			sourceTree = "<group>";
+		};
+		FF59AF4F2A612749003ADC97 /* CGPointVector */ = {
+			isa = PBXGroup;
+			children = (
+				FF59AF532A612749003ADC97 /* CGPoint.swift */,
+				FF59AF502A612749003ADC97 /* CGAffineTransform.swift */,
+				FF59AF512A612749003ADC97 /* CGSize.swift */,
+				FF59AF522A612749003ADC97 /* CGVector.swift */,
+				FF59AF542A612749003ADC97 /* CGRect.swift */,
+			);
+			path = CGPointVector;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -168,6 +187,7 @@
 				C4EB82EB248AEB7B00CD7D41 /* AppDelegate.swift in Sources */,
 				FF0192582A5F859E0062358D /* DrawLayer.swift in Sources */,
 				C4EB82ED248AEB7B00CD7D41 /* SceneDelegate.swift in Sources */,
+				FF59AF552A612885003ADC97 /* CGPoint.swift in Sources */,
 				C475655D248AEBD900F111B8 /* CameraView.swift in Sources */,
 				FFAC9AA92A5E8441008CF55D /* SpatialGestureProcessorBase.swift in Sources */,
 				C475655F248AEBD900F111B8 /* CameraViewController.swift in Sources */,
