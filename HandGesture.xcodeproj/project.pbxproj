@@ -17,7 +17,7 @@
 		FF0192582A5F859E0062358D /* DrawLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0192572A5F859E0062358D /* DrawLayer.swift */; };
 		FF01925A2A5F9F7A0062358D /* SpatialGestureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0192592A5F9E090062358D /* SpatialGestureProcessor.swift */; };
 		FF59AF552A612885003ADC97 /* CGPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF59AF532A612749003ADC97 /* CGPoint.swift */; };
-		FFAC9AA92A5E8441008CF55D /* SpatialGestureProcessorBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFAC9AA82A5E8441008CF55D /* SpatialGestureProcessorBase.swift */; };
+		FF7563B42A63D61E006A8206 /* Gesture_Heart.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF7563B32A63CF5E006A8206 /* Gesture_Heart.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,7 +40,7 @@
 		FF59AF522A612749003ADC97 /* CGVector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGVector.swift; sourceTree = "<group>"; };
 		FF59AF532A612749003ADC97 /* CGPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPoint.swift; sourceTree = "<group>"; };
 		FF59AF542A612749003ADC97 /* CGRect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGRect.swift; sourceTree = "<group>"; };
-		FFAC9AA82A5E8441008CF55D /* SpatialGestureProcessorBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpatialGestureProcessorBase.swift; sourceTree = "<group>"; };
+		FF7563B32A63CF5E006A8206 /* Gesture_Heart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gesture_Heart.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,8 +84,8 @@
 			isa = PBXGroup;
 			children = (
 				C475655C248AEBD900F111B8 /* CameraViewController.swift */,
-				FFAC9AA82A5E8441008CF55D /* SpatialGestureProcessorBase.swift */,
 				FF0192592A5F9E090062358D /* SpatialGestureProcessor.swift */,
+				FF7563B32A63CF5E006A8206 /* Gesture_Heart.swift */,
 				C475655A248AEBD800F111B8 /* CameraView.swift */,
 				FF0192572A5F859E0062358D /* DrawLayer.swift */,
 				C4EB82F5248AEB7B00CD7D41 /* LaunchScreen.storyboard */,
@@ -183,13 +183,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FF7563B42A63D61E006A8206 /* Gesture_Heart.swift in Sources */,
 				FF01925A2A5F9F7A0062358D /* SpatialGestureProcessor.swift in Sources */,
 				C4EB82EB248AEB7B00CD7D41 /* AppDelegate.swift in Sources */,
 				FF0192582A5F859E0062358D /* DrawLayer.swift in Sources */,
 				C4EB82ED248AEB7B00CD7D41 /* SceneDelegate.swift in Sources */,
 				FF59AF552A612885003ADC97 /* CGPoint.swift in Sources */,
 				C475655D248AEBD900F111B8 /* CameraView.swift in Sources */,
-				FFAC9AA92A5E8441008CF55D /* SpatialGestureProcessorBase.swift in Sources */,
 				C475655F248AEBD900F111B8 /* CameraViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

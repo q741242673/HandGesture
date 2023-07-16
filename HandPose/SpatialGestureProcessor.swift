@@ -42,102 +42,48 @@ class SpatialGestureProcessor {
 	var drawLayer: DrawLayer?										// カメラ画面上の描画レイヤー
 	var didChangeStateClosure: ((State) -> Void)?					// stateが変化した時に呼び出す関数（上位のクラスCameraViewControllerから設定される関数）
 
+	// 継承クラスから使用する変数
+	var state = State.unknown {								// 現在の判定状態を保持する変数
+		didSet {
+			didChangeStateClosure?(state)	// stateが変化したらdidChangeStateClosureを呼び出す
+		}
+	}
+	var defaultHand = WhichHand.right						// 片手だけ検出された場合は右手と仮定する（世界的に右利きが多いので）
+	var handJoints: [[[VNRecognizedPoint?]]] = []			// 両手の指の関節位置の配列（0:右手、1:左手）
+	var lastHandJoints: [[[VNRecognizedPoint?]]] = []		// 両手の指の関節位置の配列（0:右手、1:左手）... 動作のあるジェスチャーを検知するために最初のポーズを記憶
+
 	// このクラス内でのみ使用するprivate変数
-	private var defaultHand = WhichHand.right						// 片手だけ検出された場合は右手と仮定する（世界的に右利きが多いので）
-	private var handJoints: [[[VNRecognizedPoint?]]] = []			// 両手の指の関節位置の配列（0:右手、1:左手）
-	private var lastHandJoints: [[[VNRecognizedPoint?]]] = []		// 両手の指の関節位置の配列（0:右手、1:左手）... 動作のあるジェスチャーを検知するために最初のポーズを記憶
 	private var fingerJoints: [[VNRecognizedPoint?]] = []			// 指の関節位置の配列
 	private var fingerJointsCnv = [[CGPoint?]]()					// 指の関節位置の配列
 	private var wristJoint: VNRecognizedPoint?
 	private var tipsColor: UIColor = .red							// 指先を示す点の色
 	private var gestureEvidenceCounter = 0							// ジェスチャーが安定するまでのカウンター
-	private let evidenceCounterStateTrigger: Int					// ジェスチャーの状態がしばらく続いているかを判断する閾値
-	private var state = State.unknown {								// 現在の判定状態を保持する変数
-		didSet {
-			didChangeStateClosure?(state)	// stateが変化したらdidChangeStateClosureを呼び出す
-		}
-	}
 	
 	// MARK: 初期化
-	init(evidenceCounterStateTrigger: Int = 3) {
-		self.evidenceCounterStateTrigger = evidenceCounterStateTrigger
+	init() {
 		// ジェスチャーが検知された時に行う処理handleGestureStateChangeを登録する
 		self.didChangeStateClosure = { [weak self] state in
 			self?.handleGestureStateChange(state)
 		}
 		
-		reset()
+		stateReset()
 	}
-	
+
+	// MARK: ジェスチャー判定が更新された時に行う処理
+	private func handleGestureStateChange(_ state: State) {
+	}
+
 	// MARK: ジェスチャー判定ロジック
 	func checkGesture() {
-		switch state {
-		case .unknown:
-			isFirstPose()
-			break
-		case .waitForNextPose:
-			isSecondPose()
-			break
-		case .possible:
-			break
-		case .detected:
-			state = .waitForRelease
-			break
-		case .waitForRelease:
-			isPoseReleased()
-			break
-		}
 	}
 
-	func isFirstPose() {
-		if handJoints.count > 1 { // 両手のジェスチャー
-			let posRightT: CGPoint? = jointPosition(hand: WhichHand.right, finger: WhichFinger.thumb, joint: WhichJoint.tip)
-			let posRightI: CGPoint? = jointPosition(hand: WhichHand.right, finger: WhichFinger.index, joint: WhichJoint.tip)
-			let posLeftT:  CGPoint? = jointPosition(hand: WhichHand.left, finger: WhichFinger.thumb, joint: WhichJoint.tip)
-			let posLeftI:  CGPoint? = jointPosition(hand: WhichHand.left, finger: WhichFinger.index, joint: WhichJoint.tip)
-			
-			guard let posRightI, let posRightT, let posLeftI, let posLeftT else {
-				return
-			}
-			let distance = 50.0
-			if isNear(pos1: posRightT, pos2: posLeftT, value: distance) && isNear(pos1: posRightI, pos2: posLeftI, value: distance) {
-				NSLog("First gesture detected")
-				state = State.waitForNextPose
-			}
-		}
-	}
-	func isSecondPose() {
-		if handJoints.count > 1 { // 両手のジェスチャー
-			let posRightIt: CGPoint? = jointPosition(hand: WhichHand.right, finger: WhichFinger.index, joint: WhichJoint.tip)
-			let posLeftIt:  CGPoint? = jointPosition(hand: WhichHand.left, finger: WhichFinger.index, joint: WhichJoint.tip)
-			let posRightIp: CGPoint? = jointPosition(hand: WhichHand.right, finger: WhichFinger.index, joint: WhichJoint.pip)
-			let posLeftIp:  CGPoint? = jointPosition(hand: WhichHand.left, finger: WhichFinger.index, joint: WhichJoint.pip)
-
-			let distance = 50.0
-			if isPoint(posRightIp, isUpperThan: posRightIt, value: distance) && isPoint(posRightIp, isUpperThan: posRightIt, value: distance) {
-				NSLog("Second gesture detected")
-				state = State.detected
-			}
-		}
-	}
-	func isPoseReleased() {
-		if handJoints.count > 1 { // 両手のジェスチャー
-			let posRightT: CGPoint? = jointPosition(hand: WhichHand.right, finger: WhichFinger.thumb, joint: WhichJoint.tip)
-			let posRightI: CGPoint? = jointPosition(hand: WhichHand.right, finger: WhichFinger.index, joint: WhichJoint.tip)
-			let posLeftT:  CGPoint? = jointPosition(hand: WhichHand.left, finger: WhichFinger.thumb, joint: WhichJoint.tip)
-			let posLeftI:  CGPoint? = jointPosition(hand: WhichHand.left, finger: WhichFinger.index, joint: WhichJoint.tip)
-			
-			guard let posRightI, let posRightT, let posLeftI, let posLeftT else {
-				return
-			}
-			let distance = 200.0
-			if isFar(pos1: posRightT, pos2: posLeftT, value: distance) && isFar(pos1: posRightI, pos2: posLeftI, value: distance) {
-				NSLog("Release gesture detected")
-				state = State.unknown
-			}
-		}
+	// MARK: 判定状態のリセット
+	func stateReset() {
+		clearHandJoints()
+		state = .unknown			// 状況不明
 	}
 
+	// MARK: ジェスチャー判定用の演算
 	// 関節位置が近いか判断
 	func isNear(pos1: CGPoint?, pos2: CGPoint?, value: Double) -> Bool {
 		guard let p1 = pos1, let p2 = pos2 else { return false }
@@ -150,49 +96,20 @@ class SpatialGestureProcessor {
 		if p1.distance(from: p2) > value { return true }
 		return false
 	}
-	// 関節位置の位置関係を判断
+	// 関節位置が画面内で上か
 	func isPoint(_ pos: CGPoint?, isUpperThan: CGPoint?, value: Double) -> Bool {
 		guard let p1 = pos, let p2 = isUpperThan else { return false }
 		if (p1 - p2).y < value { return true }
 		return false
 	}
+	// 関節位置が画面内で下か
     func isPoint(_ pos: CGPoint?, isLowerThan: CGPoint?, value: Double) -> Bool {
 	    guard let p1 = pos, let p2 = isLowerThan else { return false }
 	    if (p1 - p2).y > value { return true }
 	    return false
     }
 
-	// MARK: ジェスチャー判定が更新された時に行う処理
-	private func handleGestureStateChange(_ state: State) {
-
-		switch state {
-		case .unknown:
-			NSLog("不明")
-			break
-		case .waitForNextPose:
-			saveHandJoints()
-			NSLog("次の動作待ち")
-			break
-		case .possible:
-			NSLog("ジェスチャーの可能性")
-			break
-		case .detected:
-			NSLog("ジェスチャーを検知")
-			break
-		case .waitForRelease:
-			NSLog("ジェスチャー解除待ち")
-			break
-		}
-	}
-
-	// MARK: 判定状態のリセット
-	func reset() {
-		clearHandJoints()
-		state = .unknown			// 状況不明
-	}
-
 	// MARK: カメラに写った手を画像認識する
-
 	func processHandPoseObservations(observations: [VNHumanHandPoseObservation]) {
 
 		var fingerJoints1 = [[VNRecognizedPoint?]]()
@@ -223,11 +140,11 @@ class SpatialGestureProcessor {
 				}
 				handJoints.removeAll()
 				if pos1.x < pos2.x {
-					handJoints.append(fingerJoints2)	// WhichHand.right.rawValue
+					handJoints.append(fingerJoints2)	// WhichHand.right
 					handJoints.append(fingerJoints1)
 				}
 				else {
-					handJoints.append(fingerJoints1)	// WhichHand.right.rawValue
+					handJoints.append(fingerJoints1)	// WhichHand.right
 					handJoints.append(fingerJoints2)
 				}
 			default:
@@ -244,12 +161,14 @@ class SpatialGestureProcessor {
 		checkGesture()
 	}
 
+	// 動きのあるジェスチャーの場合、最初の関節位置を記録する
 	func saveHandJoints() {
 		lastHandJoints.removeAll()
 		lastHandJoints.append(handJoints[0])
 		lastHandJoints.append(handJoints[1])
 	}
 	
+	// 記録しておいた関節位置をクリアする
 	func clearHandJoints() {
 		lastHandJoints.removeAll()
 	}
@@ -281,10 +200,8 @@ class SpatialGestureProcessor {
 		switch handJoints.count {
 		case 1:
 			return jointPosition(hand:handJoints[WhichHand.right.rawValue], finger:finger.rawValue, joint:joint.rawValue)
-//			return cnv(handJoints[WhichHand.right.rawValue][finger.rawValue][joint.rawValue])
 		case 2:
 			return jointPosition(hand:handJoints[hand.rawValue], finger:finger.rawValue, joint:joint.rawValue)
-//			return cnv(handJoints[hand.rawValue][finger.rawValue][joint.rawValue])
 		default:
 			return nil
 		}
@@ -324,13 +241,13 @@ class SpatialGestureProcessor {
 				if i>0 {
 					path.addLine(to: point)			// Line
 				}
-				path.addPath(drawJoin(at: point))	// Dot
+				path.addPath(drawJoint(at: point))	// Dot
 				path.move(to: point)
 				i += 1
 			}
 			if let wJoint = cnv(wristJoint) {
 				path.addLine(to: wJoint)			// Line
-				path.addPath(drawJoin(at: wJoint))	// Dot
+				path.addPath(drawJoint(at: wJoint))	// Dot
 			}
 		}
 		
@@ -341,8 +258,8 @@ class SpatialGestureProcessor {
 		return path
 	}
 
-	func drawJoin(at point: CGPoint) -> CGPath {
-		return CGPath(roundedRect: NSRect(x: point.x - 10, y: point.y - 10, width: 20, height: 20), cornerWidth: 10, cornerHeight: 10, transform: nil)
+	func drawJoint(at point: CGPoint) -> CGPath {
+		return CGPath(roundedRect: NSRect(x: point.x - 5, y: point.y - 5, width: 10, height: 10), cornerWidth: 5, cornerHeight: 5, transform: nil)
 	}
 
 }

@@ -25,8 +25,8 @@ class CameraViewController: UIViewController {
 	private var handPoseRequest = VNDetectHumanHandPoseRequest()		// 指の関節の位置情報を検出するためのクラス
 	
 	// 空間ジェスチャー
-	private var spatialGestureProcessor = SpatialGestureProcessor()		// 空間ジェスチャーを判定するクラス
-
+	private var gestureProcessors = [SpatialGestureProcessor]()			// 空間ジェスチャーを判定するクラスがこの配列に入る
+	
 	// アプリ画面が表示される直前の処理
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -39,6 +39,9 @@ class CameraViewController: UIViewController {
 		handPoseRequest.maximumHandCount = 2	// 両手
 //		handPoseRequest.maximumHandCount = 1	// 片手
 
+		// 検出するジェスチャーのクラスを追加する
+		gestureProcessors.append(Gesture_Heart())
+		
 		// 画面をダブルタップされた時の処理handleGestureを登録する
 		let recognizer = UITapGestureRecognizer(target: self, action: #selector(handleGesture(_:)))
 		recognizer.numberOfTouchesRequired = 1
@@ -59,8 +62,10 @@ class CameraViewController: UIViewController {
 				// カメラを表示するビューにセッションを接続する
 				cameraView.previewLayer.session = cameraFeedSession
 				// 空間ジェスチャークラスにカメラを紐付ける
-				spatialGestureProcessor.cameraView = cameraView
-				spatialGestureProcessor.drawLayer = drawLayer
+				for processor in gestureProcessors {
+					processor.cameraView = cameraView
+					processor.drawLayer = drawLayer
+				}
 			}
 			// カメラのセッションを開始（カメラ画像が更新される）
 			cameraFeedSession?.startRunning()
@@ -68,6 +73,10 @@ class CameraViewController: UIViewController {
 			// セッションが生成できない場合はエラー表示
 			AppError.display(error, inViewController: self)
 		}
+	}
+	
+	override func viewDidLayoutSubviews() {
+		drawLayer.frame = view.layer.bounds
 	}
 	
 	// アプリ画面が閉じる直前の処理
@@ -139,12 +148,9 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
 				guard let observations = handPoseRequest.results else {
 					return
 				}
-				spatialGestureProcessor.processHandPoseObservations(observations: observations)
-
-//				guard let observation = handPoseObservation else {
-//					return
-//				}
-//				spatialGestureProcessor.processHandPoseObservation(observation: observation)
+				for processor in gestureProcessors {
+					processor.processHandPoseObservations(observations: observations)
+				}
 			}
 		}
 		
