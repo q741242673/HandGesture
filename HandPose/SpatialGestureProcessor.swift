@@ -259,7 +259,7 @@ class SpatialGestureProcessor {
 	}
 
 	func drawJoint(at point: CGPoint) -> CGPath {
-		return CGPath(roundedRect: NSRect(x: point.x - 5, y: point.y - 5, width: 10, height: 10), cornerWidth: 5, cornerHeight: 5, transform: nil)
+		return CGPath(roundedRect: CGRect(x: point.x - 5, y: point.y - 5, width: 10, height: 10), cornerWidth: 5, cornerHeight: 5, transform: nil)
 	}
 
 }
