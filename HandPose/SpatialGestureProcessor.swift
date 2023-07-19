@@ -40,7 +40,7 @@ class SpatialGestureProcessor {
 	// 外部のクラスからアクセスされる変数/定義
 	var cameraView: CameraView!										// カメラ画像を表示するビュー
 	var drawLayer: DrawLayer?										// カメラ画面上の描画レイヤー
-	var didChangeStateClosure: ((State) -> Void)?					// stateが変化した時に呼び出す関数（上位のクラスCameraViewControllerから設定される関数）
+	var didChangeStateClosure:((State)->Void)?			//stateが変化した時に呼び出す関数（上位のクラスCameraViewControllerから設定される関数）
 
 	// 継承クラスから使用する変数
 	var state = State.unknown {								// 現在の判定状態を保持する変数
@@ -48,14 +48,16 @@ class SpatialGestureProcessor {
 			didChangeStateClosure?(state)	// stateが変化したらdidChangeStateClosureを呼び出す
 		}
 	}
-	var defaultHand = WhichHand.right						// 片手だけ検出された場合は右手と仮定する（世界的に右利きが多いので）
+	var defaultHand = WhichHand.right   // 片手だけ検出された場合は右手と仮定する（世界的に右利きが多いので）
+
+    var wristJoint: CGPoint?
 	var handJoints: [[[VNRecognizedPoint?]]] = []			// 両手の指の関節位置の配列（0:右手、1:左手）
 	var lastHandJoints: [[[VNRecognizedPoint?]]] = []		// 両手の指の関節位置の配列（0:右手、1:左手）... 動作のあるジェスチャーを検知するために最初のポーズを記憶
 
 	// このクラス内でのみ使用するprivate変数
+    private var wristJointRaw: VNRecognizedPoint?
 	private var fingerJoints: [[VNRecognizedPoint?]] = []			// 指の関節位置の配列
 	private var fingerJointsCnv = [[CGPoint?]]()					// 指の関節位置の配列
-	private var wristJoint: VNRecognizedPoint?
 	private var tipsColor: UIColor = .red							// 指先を示す点の色
 	private var gestureEvidenceCounter = 0							// ジェスチャーが安定するまでのカウンター
 	
@@ -84,6 +86,20 @@ class SpatialGestureProcessor {
 	}
 
 	// MARK: ジェスチャー判定用の演算
+    //指を曲げる判断
+    func isBend(pos1: CGPoint?, pos2: CGPoint?, pos3: CGPoint? ) -> Bool {
+        guard let p1 = pos1, let p2 = pos2, let p3 = pos3 else { return false }
+        //NSLog("Distance(%f,%f)", p1.distance(from: p2), p1.distance(from: p3))
+        if p1.distance(from: p2) > p1.distance(from: p3) { return true }
+        return false
+    }
+    //指を伸ばす判断
+    func isStraight(pos1: CGPoint?, pos2: CGPoint?, pos3: CGPoint? ) -> Bool {
+        guard let p1 = pos1, let p2 = pos2, let p3 = pos3 else { return false }
+        if p1.distance(from: p2) < p1.distance(from: p3) { return true }
+        return false
+    }
+    
 	// 関節位置が近いか判断
 	func isNear(pos1: CGPoint?, pos2: CGPoint?, value: Double) -> Bool {
 		guard let p1 = pos1, let p2 = pos2 else { return false }
@@ -185,7 +201,8 @@ class SpatialGestureProcessor {
 				[fingers[.ringTip],  fingers[.ringDIP],  fingers[.ringPIP],  fingers[.ringMCP]],
 				[fingers[.littleTip],fingers[.littleDIP],fingers[.littlePIP],fingers[.littleMCP]]
 			]
-			wristJoint = fingers[.wrist]	// 手首の位置
+			wristJointRaw = fingers[.wrist]	// 手首の位置
+            wristJoint = cnv(wristJointRaw)
 		} catch {
 			NSLog("Error")
 		}
@@ -245,7 +262,7 @@ class SpatialGestureProcessor {
 				path.move(to: point)
 				i += 1
 			}
-			if let wJoint = cnv(wristJoint) {
+			if let wJoint = cnv(wristJointRaw) {
 				path.addLine(to: wJoint)			// Line
 				path.addPath(drawJoint(at: wJoint))	// Dot
 			}

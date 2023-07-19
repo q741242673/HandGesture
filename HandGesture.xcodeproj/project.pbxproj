@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		42BF98802A67B651003DA7E1 /* Gesture_Gun.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42BF987F2A67B5F1003DA7E1 /* Gesture_Gun.swift */; };
 		C475655D248AEBD900F111B8 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C475655A248AEBD800F111B8 /* CameraView.swift */; };
 		C475655F248AEBD900F111B8 /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C475655C248AEBD900F111B8 /* CameraViewController.swift */; };
 		C4EB82EB248AEB7B00CD7D41 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4EB82EA248AEB7B00CD7D41 /* AppDelegate.swift */; };
@@ -22,6 +23,7 @@
 
 /* Begin PBXFileReference section */
 		131D672E55F74A60D83C1534 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		42BF987F2A67B5F1003DA7E1 /* Gesture_Gun.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gesture_Gun.swift; sourceTree = "<group>"; };
 		72CC35B8245EF9E709BBCA67 /* SampleCode.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = SampleCode.xcconfig; path = Configuration/SampleCode.xcconfig; sourceTree = "<group>"; };
 		C475655A248AEBD800F111B8 /* CameraView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
 		C475655C248AEBD900F111B8 /* CameraViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
@@ -86,6 +88,7 @@
 				C475655C248AEBD900F111B8 /* CameraViewController.swift */,
 				FF0192592A5F9E090062358D /* SpatialGestureProcessor.swift */,
 				FF7563B32A63CF5E006A8206 /* Gesture_Heart.swift */,
+				42BF987F2A67B5F1003DA7E1 /* Gesture_Gun.swift */,
 				C475655A248AEBD800F111B8 /* CameraView.swift */,
 				FF0192572A5F859E0062358D /* DrawLayer.swift */,
 				C4EB82F5248AEB7B00CD7D41 /* LaunchScreen.storyboard */,
@@ -183,6 +186,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				42BF98802A67B651003DA7E1 /* Gesture_Gun.swift in Sources */,
 				FF7563B42A63D61E006A8206 /* Gesture_Heart.swift in Sources */,
 				FF01925A2A5F9F7A0062358D /* SpatialGestureProcessor.swift in Sources */,
 				C4EB82EB248AEB7B00CD7D41 /* AppDelegate.swift in Sources */,
