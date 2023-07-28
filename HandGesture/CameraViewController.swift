@@ -40,7 +40,9 @@ class CameraViewController: UIViewController {
 //		handPoseRequest.maximumHandCount = 1	// 片手
 
 		// 検出するジェスチャーのクラスを追加する
-		gestureProcessors.append(Gesture_Heart())
+		//gestureProcessors.append(Gesture_Heart())
+        gestureProcessors.append(Gesture_Gun())
+        
 		
 		// 画面をダブルタップされた時の処理handleGestureを登録する
 		let recognizer = UITapGestureRecognizer(target: self, action: #selector(handleGesture(_:)))
