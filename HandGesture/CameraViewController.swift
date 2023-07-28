@@ -37,7 +37,6 @@ class CameraViewController: UIViewController {
 		
 		// 手のポーズを検出するのは？
 		handPoseRequest.maximumHandCount = 2	// 両手
-//		handPoseRequest.maximumHandCount = 1	// 片手
 
 		// 検出するジェスチャーのクラスを追加する
 		//gestureProcessors.append(Gesture_Heart())
