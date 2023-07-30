@@ -88,6 +88,7 @@
 			isa = PBXGroup;
 			children = (
 				C475655C248AEBD900F111B8 /* CameraViewController.swift */,
+				FFF349FA2A76744300A31C83 /* SpatialGestureProvider.swift */,
 				FF0192592A5F9E090062358D /* SpatialGestureProcessor.swift */,
 				FF7563B32A63CF5E006A8206 /* Gesture_Heart.swift */,
 				42BF987F2A67B5F1003DA7E1 /* Gesture_Gun.swift */,
@@ -101,7 +102,6 @@
 				C4EB82F3248AEB7B00CD7D41 /* Assets.xcassets */,
 				FF3847242A738FBF006F9D5B /* HandGesture.entitlements */,
 				C4EB82F8248AEB7B00CD7D41 /* Info.plist */,
-				FFF349FA2A76744300A31C83 /* SpatialGestureProvider.swift */,
 			);
 			path = HandGesture;
 			sourceTree = "<group>";

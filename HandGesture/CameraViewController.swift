@@ -34,11 +34,4 @@ class CameraViewController: UIViewController {
 		super.viewWillDisappear(animated)
 	}
 		
-	@IBAction func handleGesture(_ gesture: UITapGestureRecognizer) {
-		guard gesture.state == .ended else {
-			return
-		}
-		gestureProvider?.clearDrawLayer()
-	}
-	
 }
