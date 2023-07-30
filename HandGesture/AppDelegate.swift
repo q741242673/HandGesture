@@ -1,9 +1,9 @@
-/*
-See LICENSE folder for this sample’s licensing information.
-
-Abstract:
-The app's delegate object.
-*/
+//
+//  AppDelegate.swift
+//  HandGesture
+//
+//  Created by Ryu Hashimoto on 2023/07/30.
+//
 
 import UIKit
 import Vision
@@ -11,12 +11,10 @@ import Vision
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-	// アプリの起動処理
     func application(_ application: UIApplication,
                      configurationForConnecting connectingSceneSession: UISceneSession,
                      options: UIScene.ConnectionOptions) -> UISceneConfiguration {
 
-		// SceneDelegate.swiftでシーンを立ち上げる
         return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
     }
 
@@ -24,7 +22,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 // MARK: - Errors
 
-// エラーが起きた時のエラー表示処理
 enum AppError: Error {
     case captureSessionSetup(reason: String)
     case visionError(error: Error)

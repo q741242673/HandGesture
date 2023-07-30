@@ -1,6 +1,9 @@
-/*
-	ハート型ジェスチャー
-*/
+//
+//  Gesture_Heart.swift
+//  HandGesture
+//
+//  Created by Yos Hashimoto on 2023/07/30.
+//
 
 import Foundation
 

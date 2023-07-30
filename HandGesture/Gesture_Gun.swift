@@ -1,6 +1,9 @@
-/*
-	曲げ伸ばし型ジェスチャー
-*/
+//
+//  Gesture_Gun.swift
+//  HandGesture
+//
+//  Created by Ryu Hashimoto on 2023/07/30.
+//
 
 import Foundation
 

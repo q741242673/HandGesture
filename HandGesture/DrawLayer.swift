@@ -1,14 +1,16 @@
-/*
-	カメラ画面上への描画レイヤー
-*/
+//
+//  DrawLayer.swift
+//  HandGesture
+//
+//  Created by Ryu Hashimoto on 2023/07/30.
+//
 
 import Foundation
 import UIKit
 import AVFoundation
 
-private let drawPath = UIBezierPath()		// 曲線
+private let drawPath = UIBezierPath()
 
-// カメラ処理
 class DrawLayer: CAShapeLayer {
 	var cameraView: CameraView!
 

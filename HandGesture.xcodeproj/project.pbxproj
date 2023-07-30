@@ -19,6 +19,7 @@
 		FF01925A2A5F9F7A0062358D /* SpatialGestureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0192592A5F9E090062358D /* SpatialGestureProcessor.swift */; };
 		FF59AF552A612885003ADC97 /* CGPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF59AF532A612749003ADC97 /* CGPoint.swift */; };
 		FF7563B42A63D61E006A8206 /* Gesture_Heart.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF7563B32A63CF5E006A8206 /* Gesture_Heart.swift */; };
+		FFF349FB2A76744300A31C83 /* SpatialGestureProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFF349FA2A76744300A31C83 /* SpatialGestureProvider.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,6 +44,7 @@
 		FF59AF532A612749003ADC97 /* CGPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPoint.swift; sourceTree = "<group>"; };
 		FF59AF542A612749003ADC97 /* CGRect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGRect.swift; sourceTree = "<group>"; };
 		FF7563B32A63CF5E006A8206 /* Gesture_Heart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gesture_Heart.swift; sourceTree = "<group>"; };
+		FFF349FA2A76744300A31C83 /* SpatialGestureProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpatialGestureProvider.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,6 +101,7 @@
 				C4EB82F3248AEB7B00CD7D41 /* Assets.xcassets */,
 				FF3847242A738FBF006F9D5B /* HandGesture.entitlements */,
 				C4EB82F8248AEB7B00CD7D41 /* Info.plist */,
+				FFF349FA2A76744300A31C83 /* SpatialGestureProvider.swift */,
 			);
 			path = HandGesture;
 			sourceTree = "<group>";
@@ -187,6 +190,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				42BF98802A67B651003DA7E1 /* Gesture_Gun.swift in Sources */,
+				FFF349FB2A76744300A31C83 /* SpatialGestureProvider.swift in Sources */,
 				FF7563B42A63D61E006A8206 /* Gesture_Heart.swift in Sources */,
 				FF01925A2A5F9F7A0062358D /* SpatialGestureProcessor.swift in Sources */,
 				C4EB82EB248AEB7B00CD7D41 /* AppDelegate.swift in Sources */,

@@ -1,13 +1,12 @@
-/*
-See LICENSE folder for this sample’s licensing information.
-
-Abstract:
-The app's scene delegate object.
-*/
+//
+//  SceneDelegate.swift
+//  HandGesture
+//
+//  Created by Ryu Hashimoto on 2023/07/30.
+//
 
 import UIKit
 
-// シーンの処理
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
