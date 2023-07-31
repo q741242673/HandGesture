@@ -35,7 +35,7 @@ class Gesture_Draw: SpatialGestureProcessor {
 				delegate?.gestureBegan(gesture: self, atPoints: [CGPointZero])
                 state = State.waitForRelease
             }
-			if(isClearCanvasPose()) {	// wait for canvas clear pose (all finger straight)
+			if(isClearCanvasPose()) {	// wait for canvas clear pose (open hand)
 				delegate?.gestureFired(gesture: self, atPoints: [CGPointZero], triggerType:0)
 				state = State.unknown
 			}
@@ -52,7 +52,7 @@ class Gesture_Draw: SpatialGestureProcessor {
         }
     }
     
-    func isPencilPose() -> Bool {
+    func isPencilPose() -> Bool {	// make pencil gesture ==> touch thumb tip to the second joint of index finger
 		if handJoints.count > 0 { // gesture of single hands
 			if isStraight(hand: .right, finger: .index) {
 				if isNear(pos1: jointPosition(hand: .right, finger: .thumb, joint: .tip), pos2: jointPosition(hand: .right, finger: .index, joint: .pip), value: checkDistance) {
@@ -63,7 +63,7 @@ class Gesture_Draw: SpatialGestureProcessor {
         return false
     }
 
-	func isClearCanvasPose() -> Bool {	// all finger straight
+	func isClearCanvasPose() -> Bool {	// open hand
 		if handJoints.count > 0 { // gesture of single hands
 			var check = 0
 			if isStraight(hand: .right, finger: .thumb){ check += 1 }
