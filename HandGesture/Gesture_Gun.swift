@@ -9,7 +9,12 @@ import Foundation
 import UIKit
 
 class Gesture_Gun: SpatialGestureProcessor {
-    
+
+	// MARK: enum
+	enum TriggerType: Int {
+		case gunShot
+	}
+
     override init() {
         super.init()
         stateReset()
@@ -50,7 +55,7 @@ class Gesture_Gun: SpatialGestureProcessor {
 				}
             }
             if(pose==3) {    // ３つ目のポーズ（親指が曲がる）を待つ
-				delegate?.gestureFired(gesture: self, atPoints: gunPoint())
+				delegate?.gestureFired(gesture: self, atPoints: gunPoint(), triggerType: TriggerType.gunShot.rawValue)
 				if(Holder.lastPose != 3) {
 					NSLog("shoot")
 					state = State.waitForNextPose

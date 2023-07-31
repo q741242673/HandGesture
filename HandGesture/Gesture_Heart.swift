@@ -42,7 +42,7 @@ class Gesture_Heart: SpatialGestureProcessor {
 			}
             break
         case .waitForRelease:	// wait for pose release
-			delegate?.gestureMoved(gesture: self, atPoints: [self.centerOfHeart()])
+			delegate?.gestureMoved(gesture: self, atPoints: [centerOfHeart()])
             if(!isThumbAndIndexTouched()) {	// wait until pose released (fingers depart)
 				delegate?.gestureEnded(gesture: self, atPoints: [CGPointZero])
                 state = State.unknown

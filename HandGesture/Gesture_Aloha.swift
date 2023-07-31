@@ -30,7 +30,7 @@ class Gesture_Aloha: SpatialGestureProcessor {
             }
             break
         case .waitForRelease:	// wait for pose release
-			delegate?.gestureMoved(gesture: self, atPoints: self.shakaTips())
+			delegate?.gestureMoved(gesture: self, atPoints: shakaTips())
             if(!isShakaPose()) {	// wait until pose released
 				delegate?.gestureEnded(gesture: self, atPoints: [CGPointZero])
                 state = State.unknown
@@ -49,7 +49,7 @@ class Gesture_Aloha: SpatialGestureProcessor {
 			if isBend(hand: .right, finger: .middle){ check += 1 }
 			if isBend(hand: .right, finger: .ring){ check += 1 }
 			if isStraight(hand: .right, finger: .little){ check += 1 }
-			if check == 5 { return true}
+			if check == 5 { return true }
         }
         return false
     }

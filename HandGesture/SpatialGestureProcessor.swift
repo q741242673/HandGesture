@@ -14,7 +14,7 @@ import Vision
 protocol SpatialGestureDelegate {
 	func gestureBegan(gesture: SpatialGestureProcessor, atPoints:[CGPoint]);
 	func gestureMoved(gesture: SpatialGestureProcessor, atPoints:[CGPoint]);
-	func gestureFired(gesture: SpatialGestureProcessor, atPoints:[CGPoint]);
+	func gestureFired(gesture: SpatialGestureProcessor, atPoints:[CGPoint], triggerType: Int);
 	func gestureEnded(gesture: SpatialGestureProcessor, atPoints:[CGPoint]);
 	func gestureCanceled(gesture: SpatialGestureProcessor, atPoints:[CGPoint]);
 }
@@ -22,7 +22,7 @@ protocol SpatialGestureDelegate {
 extension SpatialGestureDelegate {
 	func gestureBegan(gesture: SpatialGestureProcessor, atPoints:[CGPoint]) {}
 	func gestureMoved(gesture: SpatialGestureProcessor, atPoints:[CGPoint]) {}
-	func gestureFired(gesture: SpatialGestureProcessor, atPoints:[CGPoint]) {}
+	func gestureFired(gesture: SpatialGestureProcessor, atPoints:[CGPoint], triggerType: Int) {}
 	func gestureEnded(gesture: SpatialGestureProcessor, atPoints:[CGPoint]) {}
 	func gestureCanceled(gesture: SpatialGestureProcessor, atPoints:[CGPoint]) {}
 }
@@ -57,6 +57,12 @@ class SpatialGestureProcessor {
 		case dip = 1	// first joint
 		case pip = 2	// second joint
 		case mcp = 3	// third joint
+	}
+	enum WhichJointNo: Int {
+		case top = 0	// finger top
+		case first = 1	// first joint
+		case second = 2	// second joint
+		case third = 3	// third joint
 	}
 	let wristJointIndex = 0
 
