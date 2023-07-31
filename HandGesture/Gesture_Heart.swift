@@ -6,36 +6,45 @@
 //
 
 import Foundation
+import UIKit
 
 class Gesture_Heart: SpatialGestureProcessor {
     
+	let distance = 75.0
+	
     override init() {
         super.init()
         stateReset()
     }
-    
+
+	convenience init(delegate: UIViewController) {
+		self.init()
+		self.delegate = delegate as? any SpatialGestureDelegate
+	}
+
     // Gesture judging loop
     override func checkGesture() {
         switch state {
         case .unknown:			// initial state
-            if(isFirstPose()) {		// wait for first pose (both thumb touched, both index finger touched)
-                NSLog("detect first pose")
+            if(isThumbAndIndexTouched()) {		// wait for first pose (both thumb touched, both index finger touched)
+				delegate?.gestureBegan(gesture: self, atPoints: [CGPointZero])
                 state = State.waitForNextPose
                 saveHandJoints()
             }
             break
         case .waitForNextPose:	// wait for next pose
-            if(isSecondPose()) {	// wait for second pose (bend both index finger. make figure of "heart")
-                NSLog("detect second pose")
-                state = State.detected
+            if(isHeartFigure()) {	// wait for second pose (bend both index finger. make figure of "heart")
+                state = State.waitForRelease
             }
-            break
-        case .detected:			// second pose detected
-            state = .waitForRelease
+			if(!isThumbAndIndexTouched()) {	// pose released (fingers depart)
+				delegate?.gestureEnded(gesture: self, atPoints: [CGPointZero])
+				state = State.unknown
+			}
             break
         case .waitForRelease:	// wait for pose release
-            if(isPoseReleased()) {	// wait until pose released (fingers depart)
-                NSLog("pose released")
+			delegate?.gestureMoved(gesture: self, atPoints: [self.centerOfHeart()])
+            if(!isThumbAndIndexTouched()) {	// wait until pose released (fingers depart)
+				delegate?.gestureEnded(gesture: self, atPoints: [CGPointZero])
                 state = State.unknown
             }
             break
@@ -44,53 +53,31 @@ class Gesture_Heart: SpatialGestureProcessor {
         }
     }
     
-    func isFirstPose() -> Bool {
-        var gestureDetected = false
-        if handJoints.count > 1 { // gesture of both hands
-            let posRightT: CGPoint? = jointPosition(hand: WhichHand.right, finger: WhichFinger.thumb, joint: WhichJoint.tip)
-            let posRightI: CGPoint? = jointPosition(hand: WhichHand.right, finger: WhichFinger.index, joint: WhichJoint.tip)
-            let posLeftT:  CGPoint? = jointPosition(hand: WhichHand.left, finger: WhichFinger.thumb, joint: WhichJoint.tip)
-            let posLeftI:  CGPoint? = jointPosition(hand: WhichHand.left, finger: WhichFinger.index, joint: WhichJoint.tip)
-            guard let posRightI, let posRightT, let posLeftI, let posLeftT else { return false }
-            
-            let distance = 50.0
-            if isNear(pos1: posRightT, pos2: posLeftT, value: distance) && isNear(pos1: posRightI, pos2: posLeftI, value: distance) {
-                gestureDetected = true
-            }
-        }
-        return gestureDetected
+    func isThumbAndIndexTouched() -> Bool {
+		
+		if handJoints.count > 1 { // gesture of both hands
+			if isNear(pos1: jointPosition(hand: .right, finger: .thumb, joint: .tip), pos2: jointPosition(hand: .left, finger: .thumb, joint: .tip), value: distance) && isNear(pos1: jointPosition(hand: .right, finger: .index, joint: .tip), pos2: jointPosition(hand: .left, finger: .index, joint: .tip), value: distance) {
+				return true
+			}
+		}
+		return false
     }
-    func isSecondPose() -> Bool {
-        var gestureDetected = false
-        if handJoints.count > 1 { // gesture of both hands
-            let posRightIt: CGPoint? = jointPosition(hand: WhichHand.right, finger: WhichFinger.index, joint: WhichJoint.tip)
-            let posLeftIt:  CGPoint? = jointPosition(hand: WhichHand.left, finger: WhichFinger.index, joint: WhichJoint.tip)
-            let posRightIp: CGPoint? = jointPosition(hand: WhichHand.right, finger: WhichFinger.index, joint: WhichJoint.pip)
-            let posLeftIp:  CGPoint? = jointPosition(hand: WhichHand.left, finger: WhichFinger.index, joint: WhichJoint.pip)
-            guard let posRightIt, let posLeftIt, let posRightIp, let posLeftIp else { return false }
-            
-            let distance = 50.0
-            if isPoint(posRightIp, isUpperThan: posRightIt, value: distance) && isPoint(posLeftIp, isUpperThan: posLeftIt, value: distance) {
-                gestureDetected = true
-            }
-        }
-        return gestureDetected
-    }
-    func isPoseReleased() -> Bool {
-        var gestureDetected = false
-        if handJoints.count > 1 { // gesture of both hands
-            let posRightT: CGPoint? = jointPosition(hand: WhichHand.right, finger: WhichFinger.thumb, joint: WhichJoint.tip)
-            let posRightI: CGPoint? = jointPosition(hand: WhichHand.right, finger: WhichFinger.index, joint: WhichJoint.tip)
-            let posLeftT:  CGPoint? = jointPosition(hand: WhichHand.left, finger: WhichFinger.thumb, joint: WhichJoint.tip)
-            let posLeftI:  CGPoint? = jointPosition(hand: WhichHand.left, finger: WhichFinger.index, joint: WhichJoint.tip)
-            guard let posRightI, let posRightT, let posLeftI, let posLeftT else { return false }
-            
-            let distance = 200.0
-            if isFar(pos1: posRightT, pos2: posLeftT, value: distance) && isFar(pos1: posRightI, pos2: posLeftI, value: distance) {
-                gestureDetected = true
-            }
-        }
-        return gestureDetected
+    func isHeartFigure() -> Bool {
+		if isThumbAndIndexTouched()==false { return false }
+
+		if handJoints.count > 1 { // gesture of both hands
+			if isPoint(jointPosition(hand: .right, finger: .index, joint: .pip), isUpperThan: jointPosition(hand: .right, finger: .index, joint: .tip), value: distance) && isPoint(jointPosition(hand: .left, finger: .index, joint: .pip), isUpperThan: jointPosition(hand: .left, finger: .index, joint: .tip), value: distance) {
+				return true
+			}
+		}
+		return false
     }
     
+	func centerOfHeart() -> CGPoint {
+		let posRightI: CGPoint? = jointPosition(hand: .right, finger: .index, joint: .tip)
+		let posLeftT:  CGPoint? = jointPosition(hand: .left, finger: .thumb, joint: .tip)
+		guard let posRightI, let posLeftT else { return CGPointZero }
+
+		return CGPoint.midPoint(p1: posRightI, p2: posLeftT)
+	}
 }

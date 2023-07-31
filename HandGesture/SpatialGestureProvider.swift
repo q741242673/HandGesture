@@ -14,8 +14,7 @@ class SpatialGestureProvider: NSObject {
 
 	let devicePosition: AVCaptureDevice.Position = .front	// .front / .back
 	var baseView: UIView? = nil
-
-	private var cameraView: CameraView!
+	var cameraView: CameraView!
 	private let videoDataOutputQueue = DispatchQueue(label: "CameraFeedDataOutput", qos: .userInteractive)
 	private var cameraFeedSession: AVCaptureSession?
 	private let drawLayer = DrawLayer()
@@ -65,7 +64,7 @@ class SpatialGestureProvider: NSObject {
 	func clearDrawLayer() {
 		drawLayer.clearPath()
 	}
-
+	
 	func setupAVSession() throws {
 		guard let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: devicePosition) else {
 			throw AppError.captureSessionSetup(reason: "Could not find a front facing camera.")

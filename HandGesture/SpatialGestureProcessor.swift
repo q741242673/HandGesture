@@ -5,10 +5,29 @@
 //  Created by Yos Hashimoto on 2023/07/30.
 //
 
-
 import CoreGraphics
 import UIKit
 import Vision
+
+// MARK: SpatialGestureDelegate (gesture callback)
+
+protocol SpatialGestureDelegate {
+	func gestureBegan(gesture: SpatialGestureProcessor, atPoints:[CGPoint]);
+	func gestureMoved(gesture: SpatialGestureProcessor, atPoints:[CGPoint]);
+	func gestureFired(gesture: SpatialGestureProcessor, atPoints:[CGPoint]);
+	func gestureEnded(gesture: SpatialGestureProcessor, atPoints:[CGPoint]);
+	func gestureCanceled(gesture: SpatialGestureProcessor, atPoints:[CGPoint]);
+}
+
+extension SpatialGestureDelegate {
+	func gestureBegan(gesture: SpatialGestureProcessor, atPoints:[CGPoint]) {}
+	func gestureMoved(gesture: SpatialGestureProcessor, atPoints:[CGPoint]) {}
+	func gestureFired(gesture: SpatialGestureProcessor, atPoints:[CGPoint]) {}
+	func gestureEnded(gesture: SpatialGestureProcessor, atPoints:[CGPoint]) {}
+	func gestureCanceled(gesture: SpatialGestureProcessor, atPoints:[CGPoint]) {}
+}
+
+// MARK: SpatialGestureProcessor (Base class of any Gesture)
 
 class SpatialGestureProcessor {
 
@@ -16,9 +35,9 @@ class SpatialGestureProcessor {
 
 	enum State {
 		case unknown
-		case waitForNextPose
 		case possible
 		case detected
+		case waitForNextPose
 		case waitForRelease
 	}
 	enum WhichHand: Int {
@@ -31,16 +50,19 @@ class SpatialGestureProcessor {
 		case middle
 		case ring
 		case little
+		case wrist
 	}
 	enum WhichJoint: Int {
 		case tip = 0	// finger top
-		case dip		// first joint
-		case pip		// second joint
-		case mcp		// third joint
+		case dip = 1	// first joint
+		case pip = 2	// second joint
+		case mcp = 3	// third joint
 	}
+	let wristJointIndex = 0
 
 // MARK: propaties
 
+	var delegate: SpatialGestureDelegate?
 	var cameraView: CameraView!
 	var drawLayer: DrawLayer?
 	var didChangeStateClosure:((State)->Void)?
@@ -51,24 +73,24 @@ class SpatialGestureProcessor {
 	}
 	var defaultHand = WhichHand.right
 
-    var wristJoint: CGPoint?
 	var handJoints: [[[VNRecognizedPoint?]]] = []			// array of fingers of both hand (0:right hand, 1:left hand)
 	var lastHandJoints: [[[VNRecognizedPoint?]]] = []		// remember first pose
 
-    private var wristJointRaw: VNRecognizedPoint?
-	private var fingerJoints: [[VNRecognizedPoint?]] = []			// array of finger joint position (VisionKit coordinates)
+	private var fingerJoints: [[VNRecognizedPoint?]] = []			// array of finger joint position (VisionKit coordinates) --> FINGER_JOINTS
 	private var fingerJointsCnv = [[CGPoint?]]()					// array of finger joint position (UIKit coordinates)
-//	private var tipsColor: UIColor = .red							// finger color
-//	private var gestureEvidenceCounter = 0							// gesture threshold counter
 	
 	init() {
 		self.didChangeStateClosure = { [weak self] state in
 			self?.handleGestureStateChange(state)
 		}
-		
 		stateReset()
 	}
 
+	convenience init(delegate: UIViewController) {
+		self.init()
+		self.delegate = delegate as! any SpatialGestureDelegate
+	}
+	
 	private func handleGestureStateChange(_ state: State) {
 	}
 
@@ -79,20 +101,36 @@ class SpatialGestureProcessor {
 
 	// MARK: Compare joint positions
 	
-    // is finger bend?
+    // is finger bend or outstretched
     func isBend(pos1: CGPoint?, pos2: CGPoint?, pos3: CGPoint? ) -> Bool {
         guard let p1 = pos1, let p2 = pos2, let p3 = pos3 else { return false }
-        //NSLog("Distance(%f,%f)", p1.distance(from: p2), p1.distance(from: p3))
         if p1.distance(from: p2) > p1.distance(from: p3) { return true }
         return false
     }
-    // is finger straight?
+	func isBend(hand: WhichHand, finger: WhichFinger) -> Bool {
+		let posTip: CGPoint? = jointPosition(hand:hand, finger:finger, joint: .tip)
+		let pos2nd: CGPoint? = jointPosition(hand:hand, finger:finger, joint: .pip)
+		let posWrist = jointPosition(hand:hand, finger:.wrist, joint: .tip)
+		guard let posTip, let pos2nd, let posWrist else { return false }
+
+		if posWrist.distance(from: pos2nd) > posWrist.distance(from: posTip) { return true }
+		return false
+	}
     func isStraight(pos1: CGPoint?, pos2: CGPoint?, pos3: CGPoint? ) -> Bool {
         guard let p1 = pos1, let p2 = pos2, let p3 = pos3 else { return false }
         if p1.distance(from: p2) < p1.distance(from: p3) { return true }
         return false
     }
-    
+	func isStraight(hand: WhichHand, finger: WhichFinger) -> Bool {
+		let posTip: CGPoint? = jointPosition(hand:hand, finger:finger, joint: .tip)
+		let pos2nd: CGPoint? = jointPosition(hand:hand, finger:finger, joint: .pip)
+		let posWrist = jointPosition(hand:hand, finger:.wrist, joint: .tip)
+		guard let posTip, let pos2nd, let posWrist else { return false }
+
+		if posWrist.distance(from: pos2nd) < posWrist.distance(from: posTip) { return true }
+		return false
+	}
+
 	// is two joints near?
 	func isNear(pos1: CGPoint?, pos2: CGPoint?, value: Double) -> Bool {
 		guard let p1 = pos1, let p2 = pos2 else { return false }
@@ -176,7 +214,9 @@ class SpatialGestureProcessor {
 	func saveHandJoints() {
 		lastHandJoints.removeAll()
 		lastHandJoints.append(handJoints[0])
-		lastHandJoints.append(handJoints[1])
+		if handJoints.count > 1 {
+			lastHandJoints.append(handJoints[1])
+		}
 	}
 	
 	// clear last joint data array
@@ -188,16 +228,15 @@ class SpatialGestureProcessor {
 	func getFingerJoints(with observation: VNHumanHandPoseObservation) throws -> [[VNRecognizedPoint?]] {
 		do {
 			let fingers = try observation.recognizedPoints(.all)
-			// 指の関節座標をVisionKit系（画像認識系）で取得する（VNRecognizedPoint）
-			fingerJoints = [
+			// get all finger joint point in VisionKit coordinate (VNRecognizedPoint)
+			fingerJoints = [	// (FINGER_JOINTS)
 				[fingers[.thumbTip], fingers[.thumbIP],  fingers[.thumbMP],  fingers[.thumbCMC]],
 				[fingers[.indexTip], fingers[.indexDIP], fingers[.indexPIP], fingers[.indexMCP]],
 				[fingers[.middleTip],fingers[.middleDIP],fingers[.middlePIP],fingers[.middleMCP]],
 				[fingers[.ringTip],  fingers[.ringDIP],  fingers[.ringPIP],  fingers[.ringMCP]],
-				[fingers[.littleTip],fingers[.littleDIP],fingers[.littlePIP],fingers[.littleMCP]]
+				[fingers[.littleTip],fingers[.littleDIP],fingers[.littlePIP],fingers[.littleMCP]],
+				[fingers[.wrist]]	// <-- wrist joint here
 			]
-			wristJointRaw = fingers[.wrist]	// wrist position (VisionKit)
-            wristJoint = cnv(wristJointRaw)	// wrist position (UIKit)
 		} catch {
 			NSLog("Error")
 		}
@@ -206,24 +245,37 @@ class SpatialGestureProcessor {
 
 	// get joint position (UIKit coordinates)
 	func jointPosition(hand: [[VNRecognizedPoint?]], finger: Int, joint: Int) -> CGPoint? {
-		return cnv(hand[finger][joint])
+		if finger==WhichFinger.wrist.rawValue {
+			return cnv(hand[finger][wristJointIndex])
+		}
+		else {
+			return cnv(hand[finger][joint])
+		}
 	}
 	func jointPosition(hand: WhichHand, finger: WhichFinger, joint: WhichJoint) -> CGPoint? {
+		
+		var jnt = joint.rawValue
+		if finger == .wrist { jnt = wristJointIndex }
+
 		switch handJoints.count {
 		case 1:
-			return jointPosition(hand:handJoints[WhichHand.right.rawValue], finger:finger.rawValue, joint:joint.rawValue)
+			return jointPosition(hand:handJoints[WhichHand.right.rawValue], finger:finger.rawValue, joint:jnt)
 		case 2:
-			return jointPosition(hand:handJoints[hand.rawValue], finger:finger.rawValue, joint:joint.rawValue)
+			return jointPosition(hand:handJoints[hand.rawValue], finger:finger.rawValue, joint:jnt)
 		default:
 			return nil
 		}
 	}
 	func lastJointPosition(hand: WhichHand, finger: WhichFinger, joint: WhichJoint) -> CGPoint? {
+
+		var jnt = joint.rawValue
+		if finger == .wrist { jnt = wristJointIndex }
+
 		switch lastHandJoints.count {
 		case 1:
-			return jointPosition(hand:lastHandJoints[WhichHand.right.rawValue], finger:finger.rawValue, joint:joint.rawValue)
+			return jointPosition(hand:lastHandJoints[WhichHand.right.rawValue], finger:finger.rawValue, joint:jnt)
 		case 2:
-			return jointPosition(hand:lastHandJoints[hand.rawValue], finger:finger.rawValue, joint:joint.rawValue)
+			return jointPosition(hand:lastHandJoints[hand.rawValue], finger:finger.rawValue, joint:jnt)
 		default:
 			return nil
 		}
@@ -253,12 +305,9 @@ class SpatialGestureProcessor {
 					path.addLine(to: point)			// Line
 				}
 				path.addPath(drawJoint(at: point))	// Dot
+				if i==WhichFinger.wrist.rawValue { break }
 				path.move(to: point)
 				i += 1
-			}
-			if let wJoint = cnv(wristJointRaw) {
-				path.addLine(to: wJoint)			// Line
-				path.addPath(drawJoint(at: wJoint))	// Dot
 			}
 		}
 		

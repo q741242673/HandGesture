@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 class Gesture_Gun: SpatialGestureProcessor {
     
@@ -13,7 +14,12 @@ class Gesture_Gun: SpatialGestureProcessor {
         super.init()
         stateReset()
     }
-    
+
+	convenience init(delegate: UIViewController) {
+		self.init()
+		self.delegate = delegate as? any SpatialGestureDelegate
+	}
+
     // ジェスチャーを判定する流れ（ここに繰り返し入ってくる）
     override func checkGesture() {
         var pose:Int = 0
@@ -30,21 +36,28 @@ class Gesture_Gun: SpatialGestureProcessor {
         switch state {
         case .unknown:			// 初期状態では
             if(pose==1) {		// 最初のポーズ（握る）を待つ
-                NSLog("構える")
+                NSLog("in position")
+				delegate?.gestureBegan(gesture: self, atPoints: [CGPointZero])
                 state = State.waitForNextPose
-//                saveHandJoints()
             }
             break
         case .waitForNextPose:	// 最初のポーズが検出されたら
-            if(pose==2) && (Holder.lastPose != 2) {	// ２つ目のポーズ（人差し指が伸びる）を待つ
-                NSLog("狙う")
-                state = State.waitForNextPose
+            if(pose==2) {	// ２つ目のポーズ（人差し指が伸びる）を待つ
+				delegate?.gestureMoved(gesture: self, atPoints: gunPoint())
+				if (Holder.lastPose != 2) {
+					NSLog("aim")
+					state = State.waitForNextPose
+				}
             }
-            if(pose==3) && (Holder.lastPose != 3) {    // ３つ目のポーズ（親指が曲がる）を待つ
-                NSLog("撃つ")
-                state = State.waitForNextPose
+            if(pose==3) {    // ３つ目のポーズ（親指が曲がる）を待つ
+				delegate?.gestureFired(gesture: self, atPoints: gunPoint())
+				if(Holder.lastPose != 3) {
+					NSLog("shoot")
+					state = State.waitForNextPose
+				}
             }
             if(pose==1) && (Holder.lastPose != 1) {
+				delegate?.gestureEnded(gesture: self, atPoints: [CGPointZero])
                 state = State.unknown
             }
             break
@@ -66,7 +79,7 @@ class Gesture_Gun: SpatialGestureProcessor {
         if handJoints.count > 0 {
             let posRightI: CGPoint? = jointPosition(hand: WhichHand.right, finger: WhichFinger.index, joint: WhichJoint.tip)
             let posRightIm: CGPoint? = jointPosition(hand: WhichHand.right, finger: WhichFinger.index, joint: WhichJoint.mcp)
-            let posWrist = wristJoint
+			let posWrist = jointPosition(hand: WhichHand.right, finger: WhichFinger.wrist, joint: WhichJoint.tip)
             guard let posRightI, let posRightIm, let posWrist  else { return false }
 
             if isBend(pos1: posWrist, pos2: posRightIm, pos3: posRightI){
@@ -82,7 +95,7 @@ class Gesture_Gun: SpatialGestureProcessor {
         if handJoints.count > 0 {
             let posRightI: CGPoint? = jointPosition(hand: WhichHand.right, finger: WhichFinger.index, joint: WhichJoint.tip)
             let posRightIm: CGPoint? = jointPosition(hand: WhichHand.right, finger: WhichFinger.index, joint: WhichJoint.mcp)
-            let posWrist = wristJoint
+			let posWrist = jointPosition(hand: WhichHand.right, finger: WhichFinger.wrist, joint: WhichJoint.tip)
             guard let posRightI, let posRightIm, let posWrist  else { return false }
             
             if isStraight(pos1: posWrist, pos2: posRightIm, pos3: posRightI){
@@ -97,7 +110,7 @@ class Gesture_Gun: SpatialGestureProcessor {
         if handJoints.count > 0 {
             let posRightT: CGPoint? = jointPosition(hand: WhichHand.right, finger: WhichFinger.thumb, joint: WhichJoint.tip)
             let posRightTm: CGPoint? = jointPosition(hand: WhichHand.right, finger: WhichFinger.thumb, joint: WhichJoint.dip)
-            let posWrist = wristJoint
+			let posWrist = jointPosition(hand: WhichHand.right, finger: WhichFinger.wrist, joint: WhichJoint.tip)
             guard let posRightT, let posRightTm, let posWrist  else { return false }
             
             if isBend(pos1: posWrist, pos2: posRightTm, pos3: posRightT){
@@ -106,4 +119,12 @@ class Gesture_Gun: SpatialGestureProcessor {
         }
         return gestureDetected
     }
+	
+	func gunPoint() -> [CGPoint] {
+		let posIndexTip: CGPoint? = jointPosition(hand: WhichHand.right, finger: WhichFinger.index, joint: WhichJoint.tip)
+		let posIndexMcp: CGPoint? = jointPosition(hand: WhichHand.right, finger: WhichFinger.index, joint: WhichJoint.mcp)
+		guard let posIndexTip, let posIndexMcp else { return [CGPointZero] }
+		
+		return [posIndexTip, posIndexMcp]
+	}
 }

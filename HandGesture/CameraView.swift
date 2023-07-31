@@ -44,12 +44,12 @@ class CameraView: UIView {
 		overlayLayer.cameraView = self
     }
 
-	// MARK: draw dot of finger tip
+	// MARK: draw dot
     func showPoints(_ points: [CGPoint], color: UIColor) {
         pointsPath.removeAllPoints()
         for point in points {
             pointsPath.move(to: point)
-            pointsPath.addArc(withCenter: point, radius: 5, startAngle: 0, endAngle: 2 * .pi, clockwise: true)
+            pointsPath.addArc(withCenter: point, radius: 15, startAngle: 0, endAngle: 2 * .pi, clockwise: true)
         }
         overlayLayer.fillColor = color.cgColor
 		CATransaction.begin()
@@ -57,4 +57,8 @@ class CameraView: UIView {
         overlayLayer.path = pointsPath.cgPath
         CATransaction.commit()
     }
+	
+	func clearPoints() {
+		overlayLayer.clearPath()
+	}
 }
