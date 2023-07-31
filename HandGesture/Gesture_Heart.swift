@@ -66,7 +66,7 @@ class Gesture_Heart: SpatialGestureProcessor {
 		if isThumbAndIndexTouched()==false { return false }
 
 		if handJoints.count > 1 { // gesture of both hands
-			if isPoint(jointPosition(hand: .right, finger: .index, joint: .pip), isUpperThan: jointPosition(hand: .right, finger: .index, joint: .tip), value: distance) && isPoint(jointPosition(hand: .left, finger: .index, joint: .pip), isUpperThan: jointPosition(hand: .left, finger: .index, joint: .tip), value: distance) {
+			if isPoint(jointPosition(hand: .right, finger: .index, joint: .pip), upperThan: jointPosition(hand: .right, finger: .index, joint: .tip), value: distance) && isPoint(jointPosition(hand: .left, finger: .index, joint: .pip), upperThan: jointPosition(hand: .left, finger: .index, joint: .tip), value: distance) {
 				return true
 			}
 		}

@@ -149,19 +149,70 @@ class SpatialGestureProcessor {
 		if p1.distance(from: p2) > value { return true }
 		return false
 	}
+	
 	// is the joint upper than another?
-	func isPoint(_ pos: CGPoint?, isUpperThan: CGPoint?, value: Double) -> Bool {
-		guard let p1 = pos, let p2 = isUpperThan else { return false }
+	func isPoint(_ pos: CGPoint?, upperThan: CGPoint?, value: Double) -> Bool {
+		guard let p1 = pos, let p2 = upperThan else { return false }
 		if (p1 - p2).y < value { return true }
 		return false
 	}
 	// is the joint lower than another?
-    func isPoint(_ pos: CGPoint?, isLowerThan: CGPoint?, value: Double) -> Bool {
-	    guard let p1 = pos, let p2 = isLowerThan else { return false }
+    func isPoint(_ pos: CGPoint?, lowerThan: CGPoint?, value: Double) -> Bool {
+	    guard let p1 = pos, let p2 = lowerThan else { return false }
 	    if (p1 - p2).y > value { return true }
 	    return false
     }
+	// is the joint right of another?
+	func isPoint(_ pos: CGPoint?, rightOf: CGPoint?, value: Double) -> Bool {
+		guard let p1 = pos, let p2 = rightOf else { return false }
+		if (p1 - p2).x > value { return true }
+		return false
+	}
+	// is the joint left of another?
+	func isPoint(_ pos: CGPoint?, leftOf: CGPoint?, value: Double) -> Bool {
+		guard let p1 = pos, let p2 = leftOf else { return false }
+		if (p1 - p2).x < value { return true }
+		return false
+	}
 
+	// pointing ?
+	let compareMultiply = 5.0
+	func isPointingUp(hand:WhichHand, finger:WhichFinger) -> Bool {
+		let vector = calcPointingXY(hand: hand, finger: finger)
+		if (vector.dy < 0) && (fabs(vector.dy) > fabs(vector.dx)*compareMultiply) {
+			return true
+		}
+		return false
+	}
+	func isPointingDown(hand:WhichHand, finger:WhichFinger) -> Bool {
+		let vector = calcPointingXY(hand: hand, finger: finger)
+		if (vector.dy > 0) && (fabs(vector.dy) > fabs(vector.dx)*compareMultiply) {
+			return true
+		}
+		return false
+	}
+	func isPointingRight(hand:WhichHand, finger:WhichFinger) -> Bool {
+		let vector = calcPointingXY(hand: hand, finger: finger)
+		if (vector.dx > 0) && (fabs(vector.dx) > fabs(vector.dy)*compareMultiply) {
+			return true
+		}
+		return false
+	}
+	func isPointingLeft(hand:WhichHand, finger:WhichFinger) -> Bool {
+		let vector = calcPointingXY(hand: hand, finger: finger)
+		if (vector.dx < 0) && (fabs(vector.dx) > fabs(vector.dy)*compareMultiply) {
+			return true
+		}
+		return false
+	}
+	func calcPointingXY(hand:WhichHand, finger:WhichFinger) -> CGVector {
+		let tip   = jointPosition(hand:hand, finger:finger, joint: .tip)
+		let mcp   = jointPosition(hand:hand, finger:finger, joint: .mcp)
+//		let wrist = jointPosition(hand:hand, finger:.wrist, joint: WhichJoint.tip)
+		guard let p1 = tip, let p2 = mcp else { return CGVectorMake(0, 0) }
+		return CGVectorMake((p1-p2).x, (p1-p2).y)
+	}
+	
 	// MARK: Observation processing
 	func processHandPoseObservations(observations: [VNHumanHandPoseObservation]) {
 
