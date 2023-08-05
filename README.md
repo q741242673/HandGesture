@@ -81,23 +81,23 @@ class Gesture_Draw: SpatialGestureProcessor {
     self.delegate = delegate as? any SpatialGestureDelegate
   }
 
-    // Gesture judging loop
-    override func checkGesture() {
-        switch state {
+  // Gesture judging loop
+  override func checkGesture() {
+    switch state {
         case .unknown:      // initial state
-            if(isPencilPose()) {    // wait for first pose (thumb and little finger outstretched, other fingers bending)
-        delegate?.gestureBegan(gesture: self, atPoints: [CGPointZero])
+            if(isPencilPose()) {    // wait for pencil pose (thumb and index finger touched)
+                delegate?.gestureBegan(gesture: self, atPoints: [CGPointZero])
                 state = State.waitForRelease
             }
-      if(isClearCanvasPose()) {  // wait for canvas clear pose (open hand)
-        delegate?.gestureFired(gesture: self, atPoints: [CGPointZero], triggerType:0)
-        state = State.unknown
-      }
+            if(isClearCanvasPose()) {  // wait for canvas clear pose (open hand)
+              delegate?.gestureFired(gesture: self, atPoints: [CGPointZero], triggerType:0)
+              state = State.unknown
+            }
             break
         case .waitForRelease:  // wait for pose release
-      delegate?.gestureMoved(gesture: self, atPoints: IndexTip())
-            if(!isPencilPose()) {  // wait until pose released
-        delegate?.gestureEnded(gesture: self, atPoints: [CGPointZero])
+            delegate?.gestureMoved(gesture: self, atPoints: IndexTip())  // until pose released, draw line on canvas.
+            if(!isPencilPose()) {  // wait until pencil pose released
+                delegate?.gestureEnded(gesture: self, atPoints: [CGPointZero])
                 state = State.unknown
             }
             break
@@ -107,18 +107,19 @@ class Gesture_Draw: SpatialGestureProcessor {
     }
     
     func isPencilPose() -> Bool {  // make pencil gesture ==> touch thumb tip to the second joint of index finger
-    if handJoints.count > 0 { // gesture of single hands
-      if isStraight(hand: .right, finger: .index) {
-        if isNear(pos1: jointPosition(hand: .right, finger: .thumb, joint: .tip), pos2: jointPosition(hand: .right, finger: .index, joint: .pip), value: checkDistance) {
-          return true
+      if handJoints.count > 0 { // gesture of single hand
+        if isStraight(hand: .right, finger: .index) {
+          if isNear(pos1: jointPosition(hand: .right, finger: .thumb, joint: .tip),
+                    pos2: jointPosition(hand: .right, finger: .index, joint: .pip), value: checkDistance) {
+            return true
+          }
         }
       }
-    }
-        return false
+      return false
     }
 
   func isClearCanvasPose() -> Bool {  // open hand
-    if handJoints.count > 0 { // gesture of single hands
+    if handJoints.count > 0 { // gesture of single hand
       var check = 0
       if isStraight(hand: .right, finger: .thumb){ check += 1 }
       if isStraight(hand: .right, finger: .index){ check += 1 }
